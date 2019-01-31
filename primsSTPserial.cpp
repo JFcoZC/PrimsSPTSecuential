@@ -262,7 +262,6 @@ int** generateRandomGraph(int numVertices)
 //-------------------------------------------------------------
 void primsMST()
 {
-	int isVinSetVt;						//1 = si /0 = no
 	int elementsInSetVt;				//Num de Vertices en setVt
 	int random;							//r = random root of tree
 	int nextShortestVertex;	
@@ -277,19 +276,32 @@ void primsMST()
 	//Apuntar hacia direccion en memoria en HEAP donde se encuentra guardada la matriz de enteros
 	//ESTA FUNCION TIENE QUE IR ANTES QUE LOS ARREGLOS setVt y weigthsEdgesActualV porque mientras no
 	//se manda a llamar VERTICES ESTA EN 0;
-	Graph = generateRandomGraph(1000);
+	Graph = generateRandomGraph(200);
+	//Graph = getGraph();
 	
 	int setVt[VERTICES];				//Vt
-	int weigthsEdgesActualV[VERTICES]; 	//d[1..VERTICES] NOTA: SI NO SE PONE EL +20 LA MMORIA DE ESTE ARREGLO Y EL setVt se empieza a encimar
+	int weigthsEdgesActualV[VERTICES]; 	//d[1..VERTICES]
+	int checkVertice[VERTICES];			//Saber si un vertice ya fue visitado [0 = NO / 1 = SI]
 	
 	//Generar vertice de inicio de forma aleatoria [0 - VERTICES-1]
 	srand(time(NULL));	//Seed to generate random numbers
 	random = rand() % VERTICES;
 	printf("Root vertex: %i \n\n", random);
 	
+	//Inicializar que ningun vertice ha sido visistado
+	for(int index = 0; index < VERTICES; index++)
+	{
+		checkVertice[index] = 0;
+		
+	}//Fin for
+	
 	elementsInSetVt = 0;
-	setVt[elementsInSetVt] = random; 
-	elementsInSetVt++;
+	
+	//Vertice raiz primero en ser visitado:
+	setVt[elementsInSetVt] = random; 	//Agregar a arreglo que lleva el orden en como son visitados
+	elementsInSetVt++;					//Aumentar en 1 el numero de vertices visitados
+	checkVertice[random] = 1;			//Marcar en arreglo que indica que vertices ya fueron visitados
+	
 	
 	for(int i = 0; i < VERTICES; i++)
 	{
@@ -303,6 +315,8 @@ void primsMST()
 	
 	printMatrix(Graph);
 	
+	//---- INICIO PRIM'S MST -----
+	
 	starttime = omp_get_wtime();
 	
 	while(elementsInSetVt < VERTICES)
@@ -310,7 +324,7 @@ void primsMST()
 		nextShortestVertex = -1;
 		
 		//---------------------------------------------------
-		//Imrimir Pesos actuales de acuerdo al vertice actual
+		/*//Imrimir Pesos actuales de acuerdo al vertice actual
 		printf("--++--\n");
 		printf("Vertice actual #%i: %i \n", (elementsInSetVt-1) ,setVt[ (elementsInSetVt-1)]);
 		//printf("Vertice REAL #%i: %i \n", 0 ,setVt[0]);
@@ -327,7 +341,13 @@ void primsMST()
 			printf("%i ", setVt[in]);
 			
 		}//Fin for 0.1
-		printf("\n");
+		printf("\nStatus vertices: ");
+		for(int in = 0; in < VERTICES; in++) //in < (elementsInSetVt-1)
+		{
+			printf("%i ", checkVertice[in]);
+			
+		}//Fin for 0.1
+		printf("\n");*/
 		//---------------------------------------------------
 		
 		
@@ -335,84 +355,71 @@ void primsMST()
 		//in setVt;
 		for(int j = 0; j < VERTICES; j++)
 		{
-			//Verificar que el vertice todavia no este en setVt
-			for(int k = 0; k < elementsInSetVt; k++)
+			//Verificar que el vertice actual tenga camino al siguiente vertice j
+			//-----------
+			//printf("%i == %i ? OR %i == 9999 ?\n",setVt[k],j,weigthsEdgesActualV[j]);
+			//----------
+			if(  (weigthsEdgesActualV[j] == INF) || (weigthsEdgesActualV[j] == 0) )
 			{
+				//El vertice actual no tiene camino al vertice j
+				//-------------
+				//printf("Vertice %i no tiene camino valido desde el vertice actual %i \n", j, setVt[ (elementsInSetVt-1)]);
+				//--------------
 				
-				//-----------
-				//printf("%i == %i ? OR %i == 9999 ?\n",setVt[k],j,weigthsEdgesActualV[j]);
-				//----------
-				if(  (weigthsEdgesActualV[j] == INF) )
+			}//Fin fi 1
+			else
+			{
+				//Verificar que el vertice con camino todavio no este en setVt, (no haya sido visitado)
+				
+				if(checkVertice[j] == 0)
 				{
-					//El vertice actual no tiene camino al vertice j
-					//NO HACER NADA
-					//-------------
-					//printf("Vertice %i no tiene camino valido desde el vertice actual %i \n", j, setVt[ (elementsInSetVt-1)]);
-					//--------------
+					//ELEMENTO TODAVIA NO ESTA EN EL SETVT
 					
-				}//Fin fi 1
-				else
-				{
-					//Verificar que el vertice con camino todavio no este en setVt, con cada uno de los
-					//Posibles elmenetos que existen
-					for(int index = 0; index < elementsInSetVt ; index++)
+					//Si todavia no se ha guardado ningun posible
+					// next shortest vertex; guardar el primero que se encuentre
+					if(nextShortestVertex == -1)
 					{
-						if(j == setVt[index] )
-						{
-							isVinSetVt = 1;
-							index = elementsInSetVt; //Forzar salida del loop
-						}//Fin if 3.1
-						
-					}//Fin for 3
-					
-					if(isVinSetVt == 0)
-					{
-						//ELEMENTO TODAVIA NO ESTA EN EL SETVT
-						
-						//Si todavia no se ha guardado ningun posible
-						// next shortest vertex; guardar el primero que se encuentre
-						if(nextShortestVertex == -1)
-						{
-							nextShortestVertex = j;
-							//---------
-							//printf("Posible siguiente vertice: %i \n",j);
-							//----------
-						}//Fin if 3
-						else
-						{
-							//Si ya hay un next shortest vertex; comparar el actual con el 
-							//que esta guardado y quedarse al mas grande
-							if(weigthsEdgesActualV[j] < weigthsEdgesActualV[nextShortestVertex])
-							{
-								nextShortestVertex = j;
-								//--------------
-								//printf("Nuevo siguiente vertice: %i \n",j);
-								//--------------
-							}//Fin if 4
-							
-						}//Fin else 3
-						
-					}//Fin if 2
+						nextShortestVertex = j;
+						//---------
+						//printf("Posible siguiente vertice: %i \n",j);
+						//----------
+					}//Fin if 3
 					else
 					{
+						//Si ya hay un next shortest vertex; comparar el actual con el 
+						//que esta guardado y quedarse al mas grande
+						if(weigthsEdgesActualV[j] < weigthsEdgesActualV[nextShortestVertex])
+						{
+							nextShortestVertex = j;
 							//--------------
-							//printf("Vertice %i ya esta en el setVt \n", j);
-							//---------------
-					}//Fin else 2
+							//printf("Nuevo siguiente vertice: %i \n",j);
+							//--------------
+						}//Fin if 4
+						
+					}//Fin else 3
 					
-				} //Fin else 1
+				}//Fin if 2
+				else
+				{
+						//--------------
+						//printf("Vertice %i ya esta en el setVt \n", j);
+						//---------------
+				}//Fin else 2
 				
-				isVinSetVt = 0;
+			} //Fin else 1
 				
-			}//Fin for 2
 			
 		}//Fin for 1
 		
-		printf("Mejor siguiente vertice: %i \n", nextShortestVertex);
+		//-----------------------------------------------------------
+		//printf("Mejor siguiente vertice: %i \n", nextShortestVertex);
+		//-----------------------------------------------------------
 		//Guardar el nextShortesVertex en set de vertexes
 		setVt[elementsInSetVt] = nextShortestVertex;
 		//Incrementar numero de Vertex en el set setVt
 		elementsInSetVt++;
+		//Marcar como vertice ya visitado
+		checkVertice[nextShortestVertex] = 1;
 				
 		//Actualizar los valores de los pesos de acuerdo al nuevo vertice encontrado
 		for(int l = 0; l < VERTICES; l++)
