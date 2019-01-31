@@ -1,3 +1,8 @@
+/*
+*Como guardar matrizes de enteros/como asignar memoria para arreglos de apuntadores
+*http://c-faq.com/aryptr/dynmuldimary.html
+*/
+
 //Librerias
 #include <stdio.h>
 #include <stdlib.h>
@@ -144,12 +149,16 @@ int** getGraph()
 	filaActual = 0;
 	colActual = 0;
 	
-	//Asignar espacio de memoria para el numero de filas; 1 FILA OCUPA (FILAS+1)*(4=SizeOfInt)
-	graph = (int **)malloc( (VERTICES+1)*sizeof(int));
+	//Asignar espacio de memoria para el numero total de filas; 1 FILA OCUPA: (SizeOfIntPointer)
+	//Todas las filas/Arreglo de apuntadores = (FILAS)*(SizeOfIntPointer)
+	graph = (int **)malloc( (VERTICES)*sizeof(int*));
 	
-	//Asignar el espacio para el numero de columnas que hay en cada fila	
+	//Asignar el espacio para cada fila; cada fila ocupa NumeroColumnas*EspacioMemoria. 1 Celda ocupa	= (SizeOfInt)
+	//.:. Espacio ne cada fila = NumeroColumnas*(SizeOfInt)
+
 	for(int k = 0; k  < VERTICES; k++)
 	{
+		//Espacio en fila j = NumeroColumnas*(SizeOfInt)
 		graph[k] = (int*)malloc(VERTICES*sizeof(int));
 		
 	}//Fin for 0
@@ -200,14 +209,63 @@ int** getGraph()
 	
 }//Fin funcion get graph
 //-------------------------------------------------------------
+int** generateRandomGraph(int numVertices)
+{
+	int **randomGraph;
+	int randomValue;
+	
+	VERTICES = numVertices;
+	
+	//Asignar espacio de memoria que ocupa cada fila. Ya que cada fila es un arreglo de apuntadores
+	//de enteros el espacio que se reserva en cada fila/renglon = (SizeOfPointerInt*)
+	//.:. Espacio a reservar para todas las fila = NumeroFilas*(SizeOfPointerInt*)
+	randomGraph = (int **)malloc( (numVertices)*sizeof(int*));
+	
+	//Asignar el espacio para cada elemento dentro de cada fila. Cada fila tiene k columnas
+	//.:. Para cada fila j reservar espacio = NumeroColumnas*(SizeOfInt)
+	for(int k = 0; k  < VERTICES; k++)
+	{
+		randomGraph[k] = (int*)malloc(numVertices*sizeof(int));
+		
+	}//Fin for 1
+	
+	//Generar numeros aleatorios del 0 al 20 y llenar con ellos todos los espacios en matriz
+	for(int i = 0; i < numVertices; i++)
+	{
+		for(int j = 0; j < numVertices; j++)
+		{
+			//srand(time(NULL));	//Seed to generate random numbers
+			randomValue = rand() % 20;
+			
+			//Los valores que den 0 se guardan como INFINITO
+			if(randomValue == 0)
+			{
+				randomValue = INF;
+			}//Fin if
+			
+			randomGraph[i][j] = randomValue;
+			
+		}//Fin for 3
+		
+	}//Fin for 2
+	
+	//Asegurarse que la diagonal principal de la matriz es de puros 0s(Los vertices no pueden tener camino asi mismos)
+	for(int l = 0; l < numVertices; l++)
+	{
+		randomGraph[l][l] = 0;
+		
+	}//FIn for 4
+	
+	return randomGraph;
+	
+}//FIn metodo generateRandomGraph
+//-------------------------------------------------------------
 void primsMST()
 {
 	int isVinSetVt;						//1 = si /0 = no
 	int elementsInSetVt;				//Num de Vertices en setVt
 	int random;							//r = random root of tree
 	int nextShortestVertex;	
-	int setVt[VERTICES];				//Vt
-	int weigthsEdgesActualV[VERTICES+20]; 	//d[1..VERTICES]
 	int **Graph;
 	char resultado[10];
 	char strtottime[15];
@@ -215,40 +273,14 @@ void primsMST()
 	double endtime;
 	double totaltime;
 	
-	//-------------------------------------------------------
-	for(int z = 0; z < 20; z++)
-	{
-		printf("%i ", weigthsEdgesActualV[z]);
-		
-	}//Fin for
-	printf("\n");
-	/*for(int y = 0; y < VERTICES; y++)
-	{
-		printf("%i ", setVt[y]);
-		
-	}//Fin for
-	printf("\n");*/
-	printf("-------------------sas----\n");
-	//--------------------------------------------------------
 	
 	//Apuntar hacia direccion en memoria en HEAP donde se encuentra guardada la matriz de enteros
-	Graph = getGraph();
+	//ESTA FUNCION TIENE QUE IR ANTES QUE LOS ARREGLOS setVt y weigthsEdgesActualV porque mientras no
+	//se manda a llamar VERTICES ESTA EN 0;
+	Graph = generateRandomGraph(1000);
 	
-	//------------------------------------------
-	for(int z = 0; z < 20; z++)
-	{
-		printf("%i ", weigthsEdgesActualV[z]);
-		
-	}//Fin for
-	printf("\n");
-	/*for(int y = 0; y < VERTICES; y++)
-	{
-		printf("%i ", setVt[y]);
-		
-	}//Fin for
-	printf("\n");*/
-	printf("-------------------sas----\n");
-	//------------------------------------------
+	int setVt[VERTICES];				//Vt
+	int weigthsEdgesActualV[VERTICES]; 	//d[1..VERTICES] NOTA: SI NO SE PONE EL +20 LA MMORIA DE ESTE ARREGLO Y EL setVt se empieza a encimar
 	
 	//Generar vertice de inicio de forma aleatoria [0 - VERTICES-1]
 	srand(time(NULL));	//Seed to generate random numbers
@@ -265,39 +297,11 @@ void primsMST()
 		
 	}//Fin for 1
 	
-	//+++++++++
-	weigthsEdgesActualV[6] = 17;
-	weigthsEdgesActualV[7] = 18;
-	weigthsEdgesActualV[8] = 19;
-	weigthsEdgesActualV[9] = 20;
-	weigthsEdgesActualV[10] = 21;
-	weigthsEdgesActualV[11]= 22;
-	//+++++++++
 	
 	//d[r] = 0
 	weigthsEdgesActualV[random] = 0;
 	
 	printMatrix(Graph);
-	
-	//----------------------------------------
-	//printf("\n");
-	//printf("vertices %i\n",VERTICES);
-	//printf("random: %i\n",random);
-	//printf("elementsInSetVt: %i\n",elementsInSetVt);
-	for(int z = 0; z < 20; z++)
-	{
-		printf("%i ", weigthsEdgesActualV[z]);
-		
-	}//Fin for
-	printf("\n");
-	for(int y = 0; y < VERTICES; y++)
-	{
-		printf("%i ", setVt[y]);
-		
-	}//Fin for
-	printf("\n");
-	printf("-------------------sas2----\n");
-	//--------------------------------------------
 	
 	starttime = omp_get_wtime();
 	
@@ -318,7 +322,7 @@ void primsMST()
 		}//Fin for 0.0
 		
 		printf("\nVertices recorridos: ");
-		for(int in = 0; in < VERTICES; in++) //in < (elementsInSetVt-1)
+		for(int in = 0; in < elementsInSetVt-1; in++) //in < (elementsInSetVt-1)
 		{
 			printf("%i ", setVt[in]);
 			
