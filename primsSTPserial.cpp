@@ -260,7 +260,7 @@ int** generateRandomGraph(int numVertices)
 	
 }//FIn metodo generateRandomGraph
 //-------------------------------------------------------------
-void primsMST()
+void primsMST(int V)
 {
 	int elementsInSetVt;				//Num de Vertices en setVt
 	int random;							//r = random root of tree
@@ -276,7 +276,7 @@ void primsMST()
 	//Apuntar hacia direccion en memoria en HEAP donde se encuentra guardada la matriz de enteros
 	//ESTA FUNCION TIENE QUE IR ANTES QUE LOS ARREGLOS setVt y weigthsEdgesActualV porque mientras no
 	//se manda a llamar VERTICES ESTA EN 0;
-	Graph = generateRandomGraph(200);
+	Graph = generateRandomGraph(V);
 	//Graph = getGraph();
 	
 	int setVt[VERTICES];				//Vt
@@ -313,7 +313,9 @@ void primsMST()
 	//d[r] = 0
 	weigthsEdgesActualV[random] = 0;
 	
-	printMatrix(Graph);
+	//+++++
+	//printMatrix(Graph);
+	//+++++
 	
 	//---- INICIO PRIM'S MST -----
 	
@@ -433,14 +435,16 @@ void primsMST()
 	endtime = omp_get_wtime();
 	totaltime = endtime - starttime;
 	
+	//-----------------------------------------------
 	//RESUTADO
-	printf("\nRESULTADO DEL MST: \n");
-	for(int in = 0; in < VERTICES; in++)
+	printf("\nRESULTADO DEL MST en %f segundos: \n",totaltime);
+	/*for(int in = 0; in < VERTICES; in++)
 	{
 		printf("%i ", setVt[in]);
 			
 	}//Fin for resultado final
-	printf("\n");
+	printf("\n");*/
+	//---------------------------------------------
 	
 	//Convertir entero de numero de vertices a cadena
 	//Convertir int to char itoa(value,string,base)
@@ -466,7 +470,12 @@ int main()
 	//Datos de entrada
 	
 	//Proceso
-	primsMST();
+	for(int i = 9000; i <= 14000; i+=100 )
+	{
+		primsMST(i);
+		primsMST(i);		
+	}//FIn for1
+	
 	
 	//Datos de salida
 	

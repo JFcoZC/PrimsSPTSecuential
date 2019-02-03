@@ -1,11 +1,7 @@
-COMPILAR PROGRAMA CON OMP:
-gcc -fopenmp primsSTPserial.cpp -o primsSTPSerial
-CORRER PROGRAMA:
-primsSTPSerial
+*Crear ejecutable matlab
+1)En command window de matlab poner: mcc -m <filename.m> ó <filename>
+2)Esperar a que se genere el ejecutable
 
-CONFIGURAR DEVC PARA CORRER OPENMP
-Tools > Compiler Options > Check the option "Add the following commands when compiler is called" > in the text area put "-fopenmp"
-https://stackoverflow.com/questions/8032654/openmp-on-dev-c
-
-Como guardar matrizes de enteros/como asignar memoria para arreglos de apuntadores
-*http://c-faq.com/aryptr/dynmuldimary.html
+*Correr ejecutable
+1)Doble click
+2)Enter
